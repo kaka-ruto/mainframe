@@ -1,0 +1,305 @@
+<!-- managed-by: any-cli | cli_version: 0.2.2 -->
+
+# Anywaye Agent Skill
+
+Practical guide for building, deploying, and running projects on Anywaye.
+
+## What Anywaye is
+
+Anywaye is the agentic stack: solve hard problems once, choose the right tools for the work, and share reliable solutions across projects. The `any` CLI is your hands — it manages projects, dev boxes, pipelines, deploys, and secrets. The agent is the primary interface; the human steers.
+
+## Defaults to assume
+
+- Base URL for anywaye (website): `https://anywaye.com` (or `ANYWAYE_URL` env var)
+- Base URL for ship service: `https://anywaye.com` (or `SHIP_URL`/`ANYWAYE_URL` env var; ship is proxied under /v1/ship)
+- Ship requires a service token on every /v1 route: `SHIP_TOKEN`, sent as
+  `Authorization: Bearer $SHIP_TOKEN`
+- Base URL for identity: derived from `ANYWAYE_URL` (or `IDENTITY_URL` env var)
+- Dev boxes are cloud sandboxes managed by Anywaye (ephemeral, auto-suspend, pay-when-in-use)
+- Prod runs on the user's Anywaye box (Contabo or self-hosted)
+- All backends share one Postgres cluster
+- The manifest is `anywaye.yml` (credential-free, committable)
+
+## Getting started (agent flow)
+
+### 1. Register yourself
+
+```bash
+any user-agent register --name "Your Name"
+```
+
+This prints a claim URL. The human opens it and clicks Approve (one click). This is also where we get their email. You are now a claimed agent principal.
+
+### 2. Create a project
+
+```bash
+any project create --name my-saas --owner <owner-id>
+```
+
+Or via ship API:
+```bash
+curl -s -X POST $SHIP_URL/v1/projects/ -H "Content-Type: application/json" \
+  -d '{"name":"my-saas","owner_id":"<owner-id>"}'
+```
+
+### 3. Provision a dev box
+
+```bash
+any devbox create --name my-saas
+# Wraps: # Provisioned by Anywaye: any devbox create my-saas
+```
+
+The dev box is a Anywaye-managed cloud VM with the universal template (git, Node 22, Python, Go, Rust, Docker, Claude Code, Codex). It auto-suspends after 30 idle minutes.
+
+### 4. Connect your repo
+
+```bash
+# Move your local repo to the dev box (with uncommitted work + history)
+# Follow the anywaye-move-repo skill
+
+# Or clone from GitHub/Forgejo
+any devbox exec my-saas -- 'git clone https://github.com/you/my-saas.git /data/workspace/my-saas'
+```
+
+### 5. Add anywaye services
+
+```bash
+# Hosted (anywaye operates on Contabo)
+# There is no project subcommand for adding a service: it is a ship route.
+curl -s -X POST $SHIP_URL/v1/projects/<id>/services -d '{"service":"identity"}'
+```
+
+### 6. Set up secrets
+
+```bash
+# Set secrets on the dev box (via Anywaye secrets)
+any secret set ANTHROPIC_API_KEY  # value from stdin
+any secret set DATABASE_URL
+
+# Or via the secret command (local dev)
+any secret set DATABASE_URL
+```
+
+### 7. Develop on the dev box
+
+```bash
+# SSH into the dev box
+any devbox exec my-saas
+
+# Inside the box:
+cd /data/workspace/my-saas
+npm install  # or whatever your stack uses
+npm test     # run tests
+```
+
+Your agent (Claude Code, Codex, etc.) can SSH into the box and do the same:
+```bash
+any devbox exec my-saas -- 'cd /data/workspace/my-saas && npm test'
+```
+
+### 8. Deploy to prod
+
+```bash
+# Agent asks: "Deploy to prod? (yes/no)"
+# Human says yes in their editor.
+any deploy  # commits values change → Argo syncs on your box
+# Argo waits for /readyz before completing rollout
+```
+
+Deploy is reversible: `git revert <commit>` + Argo sync.
+
+### 9. Monitor and fix
+
+```bash
+# Agent observes via any mcp (read-only)
+any mcp  # serves read-only tools: Argo status, pod logs, Loki queries
+
+# On error, agent diagnoses, opens fix commit, human approves, deploy
+```
+
+### 10. Add a second project
+
+Repeat from step 2. Each project gets its own dev box, services, and deploy target.
+
+## CLI command reference
+
+### Project management
+- `any project create --name <name> --owner <id>` — Create a project
+- `any project list --owner <id>` — List projects
+- `any project get <id>` — Get project details
+
+### Dev boxes
+- `any devbox create --name <name>` — Create a dev box
+- `any devbox exec <name>` — SSH into a dev box
+- `any devbox exec <name> -- <cmd>` — Run a command on a dev box
+- `any devbox ls` — List dev boxes
+- `any devbox rm <name>` — Delete a dev box
+
+### Pipeline
+- `any pipeline get <project-id>` — Show the project's pipeline
+- `any pipeline update <project-id> --recipe <name>` — Update pipeline (install a preset)
+- `any pipeline advance <project-id>` — Advance to the next stage
+- `any pipeline recipes` — List available pipeline recipes
+
+Recipes (as ship names them): `software` (Backlog → In Progress → Review (approval) → Done), `deploy` (Build (check) → Test (check) → Deploy (approval) → Verify (check)), `contribution` (Backlog (open door) → Implement → Verify (check) → Review (approval) → Done), `default` (single generic stage, no gates, no opinions)
+
+### Gates
+- `any gate decide <project-id> <stage> --status passed|failed --by <id> --note <text>` — Decide a gate
+
+### Tasks
+- `any task create <project-id> --title <title> --kind <kind>` — Create a task
+- `any task list <project-id> [--kind] [--status]` — List tasks
+- `any task get <project-id> <task-id>` — Get task details
+- `any task status <project-id> <task-id> <status>` — Update status
+- `any task stage <project-id> <task-id> <stage>` — Move to stage
+- `any task results <project-id> <task-id> --type success|failure|info --message <text>` — Record a result
+
+There is no task-scoped approve/reject/merge: ship decides LANDINGS, not
+tasks, and `any landing` is where those verbs are.
+
+### Landings (contributions)
+- `any landing create <project-id> --kind <kind> --title <title> [--contributor <id>]` — Submit a landing
+- `any landing list <project-id> [--kind] [--status]` — List landings
+- `any landing get <project-id> <landing-id>` — Get landing details
+- `any landing approve <project-id> <landing-id> [--by] [--note]` — Approve
+- `any landing reject <project-id> <landing-id> [--by] [--note]` — Reject
+- `any landing merge <project-id> <landing-id>` — Merge
+- `any landing results <project-id> <landing-id> --type success|failure|info --message <text>` — Record a result
+
+### Board
+- `any board view <project-id>` — Record that you viewed the board
+- `any board attention <project-id>` — Check if attention is needed
+
+### Deploy
+- `any deploy` — Deploy to prod (commits values change → Argo sync)
+- `any backup` — Backup the box
+
+### Secrets
+- `any secret set <name>` — Set a secret (value from stdin)
+- `any secret get <name>` — Get a secret
+- `any secret list` — List secrets
+
+### Feature flags
+- `any features` — List global feature flags and their on/off state
+
+### Observability
+- `any mcp` — Serve read-only MCP tools (Argo status, pod logs, Loki queries)
+
+### Skills
+- `any skills install` — Install/update the anywaye agent skill file
+- `any skills install --root <path>` — Install to a specific root
+
+## Sandbox testing (cloud dev env)
+
+Anywaye supports developing entirely in the cloud. No local clone needed.
+
+### Setting up a sandbox
+
+1. Create a dev box: `any devbox create my-project`
+2. Run the setup script (or do manually):
+   - Install anywaye CLI: build from source or download
+   - `any skills install` — install this skill
+   - Install opencode: download from GitHub releases
+   - Install crush: `go install github.com/charmbracelet/crush@latest`
+   - Set up OPENCODE_API_KEY via Anywaye secrets
+   - Set up GH_TOKEN via Anywaye secrets (for private repos)
+   - Install cloudflared for nice URLs (optional)
+3. Move your repo: follow the anywaye-move-repo skill
+4. Install deps: run the project's install command
+5. Start coding: `any devbox exec my-project` or use your agent
+
+### Nice URLs (Cloudflare)
+For production or persistent dev boxes, set up a Cloudflare tunnel:
+```bash
+cloudflared tunnel login  # opens browser
+cloudflared tunnel create my-project
+cloudflared tunnel route dns my-project dev.myproject.anywaye.com
+cloudflared tunnel run my-project
+```
+
+For quick testing, use anywaye tunnels:
+```bash
+any tunnel start <project-id> --port 3000
+# Returns: https://dev-<name>-<id>-1.anywaye.com
+```
+
+### Testing workflow
+1. Create dev box → move repo → install deps → verify tests pass
+2. Make changes → run tests → if pass, deploy
+3. Deploy → verify /readyz → check monitoring
+4. Fix bugs → re-deploy → verify
+
+## Common patterns
+
+### Auto-advance on green
+The agent can implement "auto-advance when tests pass" by:
+1. Running tests on the dev box
+2. If tests pass, calling `any pipeline advance <project-id>`
+3. If tests fail, opening a fix commit
+
+### Feature flags
+```bash
+# Create a flag
+curl -s -X POST $SHIP_URL/v1/projects/<id>/flags -d '{"name":"dark-mode","enabled":true,"rollout_percent":50}'
+
+# Evaluate for a user
+curl -s -X POST $SHIP_URL/v1/projects/<id>/flags/dark-mode/evaluate -d '{"user_id":"user123"}'
+```
+
+### Dev databases
+```bash
+# Provision a dev database
+curl -s -X POST $SHIP_URL/v1/projects/<id>/devdb
+# Returns: connection_string, host, port, username, password
+```
+
+### Landings (contributions)
+```bash
+# Submit a landing (replaces PR)
+any landing create <project-id> --kind change --title "add dark mode"
+
+# Approve (human or agent)
+any landing approve <project-id> <landing-id> --by <id> --note "looks good"
+
+# The landing creates a linked task automatically
+```
+
+## Key principles
+
+1. **No local clone required** — Everything happens on dev boxes or prod boxes.
+2. **Agents do the editing** — Humans speak to agents; agents SSH into dev boxes and edit code.
+3. **Reversible prod** — Every deploy is a git commit. Revert = `git revert` + Argo sync.
+4. **Auto-suspend dev boxes** — Pay only when active. Near-zero cost when idle.
+5. **Forgejo canonical** — All code lives on self-hosted Forgejo. GitHub is an optional mirror.
+6. **In-chat approval** — Agent asks "deploy? yes/no" in your editor. You say yes. Done.
+7. **Shared Postgres** — One cluster, per-service databases and roles.
+8. **Sane defaults** — Single generic "Work" stage. Install a recipe when you want structure.
+9. **Evidence-backed** — Every gate transition carries proof (test results, build output, etc.).
+10. **Attention model** — "Finished while you were away" — the board shows what changed since you last looked.
+
+## Private repos and packages
+
+Anywaye repos and packages are private. To build on dev boxes or deploy on Contabo:
+
+### Instabox (dev boxes)
+1. Set up GitHub auth on your laptop: `gh auth login`
+2. Set your GitHub token via Anywaye secrets:
+   ```
+   # scans your machine, lets you pick tokens/files
+   ```
+   This puts `GH_TOKEN` into every box (current and future).
+3. Boxes can then clone private repos: `gh repo clone anywaye/<repo>`
+4. Boxes can pull private images: `docker login ghcr.io -u <user> -p $GH_TOKEN`
+
+### Contabo (prod)
+- Pull secrets (`ghcr-pull-secret`) exist in every namespace
+- They use a GitHub token with `write:packages` scope (implies `read:packages`)
+- ArgoCD pulls charts from `oci://ghcr.io/anywaye/charts` using `ghcr-charts-repo` secret
+- No changes needed — already configured for private packages
+
+### Forgejo (internal git host)
+- Anywaye Git (Forgejo) runs on Contabo at `git.anywaye.com` — the canonical git host. GitHub is a legacy mirror being phased out.
+- All anywaye code is pushed here as the canonical source
+- GitHub is an optional mirror
+- Instabox boxes can reach Forgejo (public URL)
+- Boxes need a Anywaye Git token to push: set via `any secret` or the dashboard

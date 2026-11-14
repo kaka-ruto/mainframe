@@ -1,0 +1,16 @@
+# sandbox.yml - Dev environment spec for boax sandboxes
+# Place this in any project repo under .boax/sandbox.yml
+
+base: hot-base
+packages: packages.conf
+provision: provision.sh
+configs:
+  skills: common
+  mcp: common
+  dotfiles: true
+secrets:
+  provider: bitwarden
+  items:
+    - Infisical agent-vault proxy token (mainframe)
+repos:
+  - https://github.com/anywaye/anywaye.git

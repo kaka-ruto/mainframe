@@ -1,0 +1,25 @@
+mode: dev
+
+tailscale:
+  enabled: true
+
+firewall:
+  mode: tailscale-only
+  extra_ports: []
+
+hardening:
+  ssh_crypto: true
+  bbr: true
+  apparmor: true
+  unattended: true
+  needrestart: true
+  swap: true
+  journald: true
+  etckeeper: true
+  deadman: true
+  fail2ban: true
+
+secrets:
+  backend: bitwarden
+
+packages: packages.conf

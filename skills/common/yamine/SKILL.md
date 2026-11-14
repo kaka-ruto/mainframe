@@ -1,0 +1,229 @@
+---
+name: yamine
+description: Run Ruby apps through yamine for stable named .localhost URLs (e.g. https://myapp.localhost instead of http://localhost:3000). Use when booting dev servers (Rails, Rack, Roda, Sinatra, Jekyll), wiring frontend to API, configuring OAuth callbacks or webhooks, debugging port conflicts, or working in git worktrees.
+---
+
+# Local Dev with yamine
+
+Never invent ports. Never parse them from logs. Every app has a stable URL.
+
+## One file, one command
+
+Every app declares `config/local.yml` — the single source of truth:
+
+```yaml
+service: myapp
+proxy:
+  tld: localhost
+processes:
+  web:
+    cmd: bundle exec puma -b tcp://127.0.0.1:$PORT config.ru
+    proxy: true          # gets https://myapp.localhost
+  worker:
+    cmd: bundle exec sidekiq
+    proxy: false         # background, supervised, no URL
+env:
+  clear:
+    RAILS_ENV: development
+```
+
+If the file is missing, yamine prints `Run yamine init`. Generate it
+with `yamine init` (migrates an existing Procfile). Rails apps need
+no extra gem — the proxied hostname is allowed automatically via
+`RAILS_DEVELOPMENT_HOSTS`.
+
+```bash
+yamine start              # setup if needed, then boot every process (waits until healthy)
+yamine start --no-wait   # fire-and-forget (register routes immediately)
+yamine start --json       # machine-readable wait result (--wait default)
+yamine start --detach    # boot in the background; returns once healthy, prints url/pid/log
+yamine                    # same as start
+yamine stop               # stop this app's backend + routes
+yamine status             # show service, processes, and URLs
+yamine log [-F]           # tail log/development.log (every process)
+```
+
+`$PORT` and `YAMINE_URL` are injected per process; HTTP processes get
+stable URLs, background ones are supervised without routes. A process
+that exits cleans up the whole tree — and ends the run with exit 1,
+naming that process, its exit status and the tail of its log. Zero from
+`yamine start` means the app is up.
+
+`--detach` is the one to use from a tool: it forks the boot, so the
+command returns with the URL, the pid that owns the tree (recorded in
+`routes.json`, so the route outlives the command) and that tree's log
+path under `~/.yamine/`. Run it again and it reports the running tree
+instead of starting a second one; `yamine stop` stops it. Do not reach
+for `nohup` — the tree yamine starts is the one `yamine stop` can reach.
+
+The boot narrates every phase — deps, db, schema, and each process's
+healthcheck — one line per phase, so a slow boot is never a black box:
+
+```
+  [deps] ok (479ms) dependencies satisfied
+  [web] ok (2.2s) healthcheck /up returned 2xx-3xx
+```
+
+With `--json` the same events stream to stdout as one JSON object per
+line, flushed as they happen (safe to read incrementally), and the
+human banner moves to stderr — so stdout stays parseable and the final
+payload is the last line:
+
+```
+{"phase":"deps","action":"deps","status":"ok","duration_ms":479,...}
+{"phase":"process","action":"web","status":"ok","duration_ms":2223,...}
+{"ok":true,"service":"myapp","urls":{"web":"https://myapp.localhost"},...}
+```
+
+On failure the payload carries the failed phase, that process's log tail,
+and the log path — no need to go digging.
+
+## Cross-service wiring
+
+```bash
+yamine get backend            # -> https://backend.localhost
+yamine get backend --variant demo
+```
+
+Use `get` output for frontend-to-API URLs, Cable URLs, and webhook
+targets. Do not guess ports.
+
+## Variants are files; worktrees are not
+
+A variant is a file overlay, Kamal-style: `config/local.<variant>.yml`
+deep-merges over `config/local.yml`, selected with `YAMINE_VARIANT` or
+`--variant`. Naming one also prefixes the hostname.
+
+A git worktree needs none of that: it gets a branch prefix automatically
+(`ui-onboarding.myapp.localhost`) and boots alongside its main checkout,
+which keeps the bare name. The whole branch is the label, so
+`feature/login` and `bugfix/login` stay distinct. A detached worktree
+falls back to its directory name.
+
+```bash
+YAMINE_VARIANT=fix-ui yamine    # boots with config/local.fix-ui.yml merged
+```
+
+Only an explicit variant ever looks for an overlay file — a branch name
+that happens to match one on disk is ignored. `yamine status` shows
+`variant:` and `overlay:` separately.
+
+## Worktree lifecycle
+
+```bash
+yamine worktree add feature/login   # create + make bootable
+yamine worktree list                # branch, dir, db, dirty/merged
+yamine worktree remove feature/login
+yamine worktree clean [--dry-run]
+```
+
+`add` creates the git worktree beside the repo, copies the gitignored
+per-checkout config (`config/local.yml`, `config/local.secrets`,
+`config/master.key`, and the development/test credential keys — never
+production/staging keys), runs `bundle install`, **asks the app what
+databases it has** (one `bin/rails runner` probe — database.yml and
+credentials resolve inside the app; yamine never parses them), and
+provisions the whole set with schema — every database of a
+multi-database app gets a per-worktree suffix, the test database
+included and schema-prepared, so `rails test` runs as-is. It writes
+`.env.development` (the development set) and `.env.test`
+(`PRIMARY_DATABASE_URL` — the key Rails checks first for a flat test
+config) into the worktree, git-excluded automatically — never plain `.env`
+(production tooling reads that name), and existing keys in those files
+are upserted, not clobbered. Then boot with
+`yamine start` inside it. `remove` and `clean` drop the entire set as
+a unit — including from an orphaned claim whose directory is gone,
+without booting the app — and `clean` never touches uncommitted work;
+unmerged branches survive everything except `remove --force`. Prefer
+`clean --dry-run` first, and `clean` over `rm -rf` — a removed
+worktree leaves no routes, databases, or stale hosts entries behind.
+
+`yamine db describe` shows what the current checkout resolves to
+(passwords masked); `yamine db list` shows every database under every
+claim; `yamine db create` re-probes and self-heals (run it in each
+worktree after the app grows a database).
+
+Isolation reaches two places: supervised boots via injected
+`DATABASE_URL` / `NAME_DATABASE_URL` env vars, and hand-run commands
+(`rails console`, `rails test`, `db:migrate`) via these env files —
+which require a dotenv loader in the app (`gem "dotenv-rails",
+groups: [:development, :test]`) and **component-form development/test
+config** (`database:` keys, never `url:` — a `url:` key takes
+precedence over the entire environment, so nothing injected or loaded
+can redirect it; staging/production URLs are fine, yamine never
+touches those envs). `worktree add` verifies both and prints
+`.env loaded — hand-run commands are isolated too`; its warning names
+exactly which requirement is missing and the fix.
+
+## Subdomains are opt-in
+
+A route answers its exact hostname. `*.myapp.localhost` reaches the app
+only if it asked (`proxy.subdomains: true` in `config/local.yml`, or
+`yamine alias <name> <port> --wildcard` for one route).
+
+So a worktree whose stack is not running gets a 503 that names the parent
+app, its directory, and `yamine start` — not the parent app's code. The
+status says the app is not there, so a script can tell "not running" from
+"the app answered 404". If you hit a `.localhost` URL that loads but looks
+wrong, check you started the worktree you think you did; `yamine status` in
+it prints the URL.
+
+## First time on a machine
+
+Run `yamine start` — it does the one-shot CA trust, port 443, and
+hosts sync if anything is missing, then boots. Prefer `yamine setup`
+for workstation setup without booting. If any command fails with a
+privileged-port error, do not work around it with `-p` — run
+`yamine setup` instead. A `:port` suffix in a URL means someone
+explicitly opted into it.
+
+## OAuth and webhooks
+
+Build callback URLs from `YAMINE_URL` (injected into every HTTP
+process):
+
+```ruby
+callback = "#{Yamine::Rails.url}/auth/google/callback"
+```
+
+Strict providers (Google, Apple) reject `.localhost`. Serve the app on a
+domain you own instead — no code change, just config:
+
+```yaml
+proxy:
+  host: myapp.local.example.com   # instead of tld: localhost
+```
+
+## Troubleshooting
+
+```bash
+yamine doctor                 # read-only: proxy, routes, DNS, CA trust
+yamine list --json            # routes as stable JSON
+yamine prune                  # clear stale routes from crashed sessions
+yamine start --json           # boot readiness payload (pass/fail + log tail)
+```
+
+`yamine list` reports the state of the **app**, not of the yamine
+process that started it: `running`, `backend-gone` (the app died, the
+process that booted it is still there), `owner-gone` (both gone),
+`unknown` (no backend pid recorded — nothing is known, it is not a
+failure), and `reachable` / `unreachable` for a `yamine alias`, which
+points at a port rather than a process. `yamine restart` stops the
+backend; a managed app reboots on the next request, a `yamine start` app
+has to be started again.
+
+If a hostname does not resolve — or boot/doctor report it as not in
+`/etc/hosts` and you use clients that read only that file (CGO-disabled
+Go binaries): `yamine hosts sync`. If the browser warns about TLS:
+`yamine trust`.
+
+## When NOT to use yamine
+
+- **CI pipelines**: no TTY, no sudo, no browsers. Run the app's own test
+  command directly; yamine fails fast here by design.
+- **Production consoles and servers**: the proxy binds loopback only and
+  the CA is self-signed. Use Kamal + kamal-proxy for anything real.
+- **Docker-internal networking**: containers reach each other by service
+  name on the compose network, not via the host's `.localhost`.
+- **Debugging the proxy itself**: use `yamine proxy start --foreground`
+  and read the log; do not layer another yamine on top.

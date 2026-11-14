@@ -1,0 +1,25 @@
+{
+  "mcp": {
+    "servers": {
+      "cve-now": {
+        "type": "http",
+        "url": "https://mcp.cve.now/mcp"
+      },
+      "cloudflare": {
+        "type": "http",
+        "url": "https://mcp.cloudflare.com/mcp"
+      },
+      "cloudflare-docs": {
+        "type": "http",
+        "url": "https://docs.mcp.cloudflare.com/mcp"
+      },
+      "browse": {
+        "type": "stdio",
+        "command": "/usr/bin/browse",
+        "args": [
+          "mcp"
+        ]
+      }
+    }
+  }
+}
