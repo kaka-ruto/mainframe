@@ -1,7 +1,7 @@
 {
   "name": "ask-web-search-mcp",
   "type": "stdio",
-  "command": "/home/ubuntu/.local/share/mise/installs/ruby/4.0.1/bin/ask-web-search-mcp",
+  "command": "/home/ubuntu/.local/bin/mcp-wrappers/ask-web-search-mcp",
   "args": [],
   "env": {
     "SEARCH_BACKEND": "tinyfish"

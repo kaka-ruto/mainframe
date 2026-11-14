@@ -1,15 +1,15 @@
 {
-  "version": 1,
   "servers": {
     "ask-web-search-mcp": {
-      "type": "stdio",
-      "enabled": true,
+      "config": "mcp/servers/ask-web-search-mcp/config.json",
       "description": "Web search via tinyfish backend",
+      "enabled": true,
+      "install": "mcp/servers/ask-web-search-mcp/install.sh",
       "secrets": [
         "ask-web-search-api-key"
       ],
-      "install": "mcp/servers/ask-web-search-mcp/install.sh",
-      "config": "mcp/servers/ask-web-search-mcp/config.json"
+      "type": "stdio"
     }
-  }
+  },
+  "version": 1
 }
