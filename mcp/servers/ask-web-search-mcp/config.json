@@ -1,0 +1,12 @@
+{
+  "name": "ask-web-search-mcp",
+  "type": "stdio",
+  "command": "/home/ubuntu/.local/share/mise/installs/ruby/4.0.1/bin/ask-web-search-mcp",
+  "args": [],
+  "env": {
+    "SEARCH_BACKEND": "tinyfish"
+  },
+  "secrets": {
+    "SEARCH_API_KEY": "ask-web-search-api-key"
+  }
+}
