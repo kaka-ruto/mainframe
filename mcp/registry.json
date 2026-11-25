@@ -3,7 +3,7 @@
     "ask-web-search-mcp": {
       "config": "mcp/servers/ask-web-search-mcp/config.json",
       "description": "Web search via tinyfish backend",
-      "enabled": true,
+      "enabled": false,
       "install": "mcp/servers/ask-web-search-mcp/install.sh",
       "secrets": [
         "ask-web-search-api-key"
