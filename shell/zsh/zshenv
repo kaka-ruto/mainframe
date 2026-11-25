@@ -1,11 +1,22 @@
-export DOTFILES=$HOME/.dotfiles
+# Auto-detect mainframe directory
+if [[ -z "$MAINFRAME_DIR" ]]; then
+    for dir in "$HOME/.mainframe" "$HOME/mainframe" "$HOME/code/kaka-ruto/mainframe" "$HOME/Code/kaka-ruto/mainframe"; do
+        if [[ -f "$dir/mainframe.yml" ]]; then
+            MAINFRAME_DIR="$dir"
+            break
+        fi
+    done
+fi
+export MAINFRAME_DIR
+
+export DOTFILES="$MAINFRAME_DIR"
 export CACHEDIR="$HOME/.local/share"
-export INITVIM="$DOTFILES/config/nvim/init.vim"
+export INITVIM="$DOTFILES/editor/nvim/init.vim"
 
 [[ -d "$CACHEDIR" ]] || mkdir -p "$CACHEDIR"
 
 fpath=(
-    $DOTFILES/zsh/functions
+    $DOTFILES/shell/zsh/functions
     /usr/local/share/zsh/site-functions
     $fpath
 )
@@ -14,4 +25,11 @@ typeset -aU path
 
 export EDITOR='nvim'
 export GIT_EDITOR='nvim'
-. "$HOME/.cargo/env"
+
+# Source cargo env if available
+[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
+
+# Source mise if available
+if command -v mise &>/dev/null; then
+    eval "$(mise activate zsh)"
+fi
