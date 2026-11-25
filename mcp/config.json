@@ -31,6 +31,14 @@
         "command": "/Users/kaka/.local/share/mise/installs/ruby/4.0.10/bin/ask-web-fetch-mcp",
         "args": [],
         "env": {}
+      },
+      "ask-web-search-mcp": {
+        "type": "stdio",
+        "command": "/Users/kaka/.local/share/mise/installs/ruby/4.0.10/bin/ask-web-search-mcp",
+        "args": [],
+        "env": {
+          "SEARCH_BACKEND": "tinyfish"
+        }
       }
     }
   }

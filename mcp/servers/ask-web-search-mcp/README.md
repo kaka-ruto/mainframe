@@ -1,21 +1,22 @@
 # ask-web-search-mcp
 
-Web search MCP server using tinyfish backend.
+MCP server that exposes web search as a callable tool. Uses SearXNG by default,
+tinyfish backend when SEARCH_BACKEND=tinyfish.
 
-## Dependencies
-- Ruby 4.0+ (installed by mainframe)
-- gem: ask-web-search-mcp
+## Prerequisites
+- Ruby 4.0 (via mise)
+- ask-web-search-mcp gem
 
-## Secrets
-- TINYFISH_API_KEY: stored in Infisical (project: devbox, env: dev)
-- Fetched at runtime via wrapper (Universal Auth or Infisical CLI session)
-- Agent never sees the actual secret value
+## Tool
+- `ask_web_search` - Search the web and return results
+  - `query` (required): Search query
+  - `time_range` (optional): day, week, month, year
+  - `max_results` (optional): Maximum results
 
-## Setup
-1. Set INFISICAL_CLIENT_ID and INFISICAL_CLIENT_SECRET (Universal Auth)
-   OR log in via `infisical login` (session auth)
-2. Set INFISICAL_PROJECT_ID
-3. Run: `mf mcp install ask-web-search-mcp`
+## Configuration
+- `SEARCH_BACKEND=tinyfish` - Use tinyfish backend
+- `TINYFISH_API_KEY` - API key for tinyfish (from Bitwarden)
+- `SEARXNG_URL` - Self-hosted SearXNG instance
 
 ## Test
 ```bash
