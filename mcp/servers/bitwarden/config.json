@@ -1,11 +1,9 @@
 {
   "name": "bitwarden",
   "type": "stdio",
-  "command": "mcp-server-bitwarden",
+  "command": "/Users/kaka/.local/bin/mcp-wrappers/bitwarden-mcp",
   "args": [],
-  "env": {
-    "BW_SESSION": "{{secret:bw-session}}"
-  },
+  "env": {},
   "secrets": {
     "BW_SESSION": "bw-session"
   }
