@@ -1,0 +1,10 @@
+{
+  "name": "browse",
+  "type": "stdio",
+  "command": "/Users/kaka/.local/bin/browse",
+  "args": [
+    "mcp"
+  ],
+  "env": {},
+  "secrets": {}
+}

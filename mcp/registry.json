@@ -27,6 +27,14 @@
       "secrets": [],
       "install": "mcp/servers/ask-web-fetch-mcp/install.sh",
       "config": "mcp/servers/ask-web-fetch-mcp/config.json"
+    },
+    "browse": {
+      "type": "stdio",
+      "enabled": true,
+      "description": "Browser automation via Chrome relay",
+      "secrets": [],
+      "install": "mcp/servers/browse/install.sh",
+      "config": "mcp/servers/browse/config.json"
     }
   },
   "version": 1

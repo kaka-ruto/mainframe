@@ -15,7 +15,7 @@
       },
       "browse": {
         "type": "stdio",
-        "command": "/usr/bin/browse",
+        "command": "/Users/kaka/.local/bin/browse",
         "args": [
           "mcp"
         ]
