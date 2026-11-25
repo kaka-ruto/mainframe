@@ -1,0 +1,13 @@
+name: dev
+description: "Development machines"
+boax: true
+machines:
+  - name: macbook
+    host: local
+    os: macos
+    mode: dev
+  - name: dev-mf
+    host: ubuntu@212.47.73.20
+    os: ubuntu-24.04
+    mode: dev
+    ssh_key: ssh-key-dev-mf
