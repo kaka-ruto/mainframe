@@ -166,3 +166,5 @@ export RIPGREP_CONFIG_PATH="$HOME/.rgrc"
 
 # Vi mode
 set -o vi
+
+. "$HOME/.local/bin/env"

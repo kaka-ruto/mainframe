@@ -29,6 +29,9 @@ export GIT_EDITOR='nvim'
 # Source cargo env if available
 [[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
 
+# Source local bin env (uv, etc.)
+[[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
+
 # Source mise if available
 if command -v mise &>/dev/null; then
     eval "$(mise activate zsh)"
