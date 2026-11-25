@@ -1,0 +1,210 @@
+# Prepend programming language binaries via ASDF shims
+# ArmHomebrewfirst
+# PATH="/opt/homebrew/bin:$PATH"
+# IntelHomebrewLast
+# PATH="/usr/local/bin/brew:$PATH"
+# PATH="$HOME/.asdf/bin:$PATH"
+# PATH="$HOME/.asdf/shims:$PATH"
+# PATH="$PATH:$(yarn global bin)"
+# PATH="$HOME/.neovim/bin:$PATH"
+PATH="/usr/local/bin/nvim:$PATH"
+PATH="/opt/homebrew/opt/openssl@3/bin:$PATH"
+
+export -U PATH
+
+export ZSH=$DOTFILES/zsh
+
+if [[ -d $DOTFILES/zsh/functions ]]; then
+    for func in $DOTFILES/zsh/functions/*(:t); autoload -U $func
+fi
+
+########################################################
+# Configuration
+########################################################
+
+# Set the timezone
+export LC_ALL=en_US.UTF-8
+
+if [ -z "$TMUX" ]; then
+    tic $DOTFILES/resources/xterm-256color-italic.terminfo
+    export TERM=xterm-256color-italic
+else
+    tic -x $DOTFILES/resources/tmux-256color-italic.terminfo
+    export TERM=tmux-256color-italic
+fi
+
+fpath=($fpath ~/.zsh/completion)
+
+# initialize autocomplete for oh-my-zsh
+autoload -U compinit add-zsh-hook
+compinit
+
+prepend_path /usr/local/opt/grep/libexec/gnubin
+prepend_path /usr/local/sbin
+prepend_path $DOTFILES/bin
+prepend_path $HOME/bin
+
+# define the code directory
+# This is where my code exists and where I want the `c` autocomplete to work from exclusively
+if [[ -d ~/Code ]]; then
+    export CODE_DIR=~/Code
+fi
+
+# Use <C-Space> for word-to-word autocompletion (partial autocompletion)
+bindkey '^ ' forward-word
+
+# display how long all tasks over 10 seconds take
+export REPORTTIME=10
+
+setopt NO_BG_NICE
+setopt NO_HUP
+setopt NO_LIST_BEEP
+setopt LOCAL_OPTIONS
+setopt LOCAL_TRAPS
+setopt PROMPT_SUBST
+
+# history
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt EXTENDED_HISTORY
+setopt HIST_REDUCE_BLANKS
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_ALL_DUPS
+
+setopt COMPLETE_ALIASES
+
+# make terminal command navigation sane again
+bindkey '^[^[[D' backward-word
+bindkey '^[^[[C' forward-word
+bindkey '^[[5D' beginning-of-line
+bindkey '^[[5C' end-of-line
+bindkey '^[[3~' delete-char
+bindkey '^?' backward-delete-char
+
+# matches case insensitive for lowercase
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+
+# pasting with tabs doesn't perform completion
+zstyle ':completion:*' insert-tab pending
+
+# default to file completion
+zstyle ':completion:*' completer _expand _complete _files _correct _approximate
+
+# source all .zsh files inside of the zsh/ directory
+source "$DOTFILES/zsh/utils.zsh"
+source "$DOTFILES/zsh/prompt.zsh"
+
+# Source all bash aliases and functions
+source $DOTFILES/bash/.aliases
+for f in $DOTFILES/bash/functions/*; do source $f; done
+
+########################################################
+# Plugin setup
+########################################################
+
+export ZPLUGDIR="$CACHEDIR/zsh/plugins"
+[[ -d "$ZPLUGDIR" ]] || mkdir -p "$ZPLUGDIR"
+# array containing plugin information (managed by zfetch)
+typeset -A plugins
+
+zfetch $ZPLUGDIR zsh-users/zsh-syntax-highlighting
+zfetch $ZPLUGDIR zsh-users/zsh-autosuggestions
+zfetch $ZPLUGDIR chriskempson/base16-shell
+zfetch $ZPLUGDIR lukechilds/zsh-nvm
+
+
+[[ -e ~/.terminfo ]] && export TERMINFO_DIRS=~/.terminfo:/usr/share/terminfo
+
+########################################################
+# Setup
+########################################################
+
+if [[ -a ~/.localrc ]]; then
+    source ~/.localrc
+fi
+
+# add a config file for ripgrep
+export RIPGREP_CONFIG_PATH="$HOME/.rgrc"
+
+
+[ -f $HOME/.fzf.zsh ] && source $HOME/.fzf.zsh
+# fd is preferrred for listing files, and rg for searching files
+export FZF_DEFAULT_COMMAND='fd --type file --hidden --no-ignore'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
+# alias git to hub
+if type hub > /dev/null 2>&1; then
+    eval "$(hub alias -s)"
+fi
+
+# move to next word with ctrl-F
+bindkey -M viins "^F" vi-forward-word
+# Move to end of line with ctrl-E
+bindkey -M viins "^E" vi-add-eol
+
+# add color to man pages
+export MANROFFOPT='-c'
+export LESS_TERMCAP_mb=$(tput bold; tput setaf 2)
+export LESS_TERMCAP_md=$(tput bold; tput setaf 6)
+export LESS_TERMCAP_me=$(tput sgr0)
+export LESS_TERMCAP_so=$(tput bold; tput setaf 3; tput setab 4)
+export LESS_TERMCAP_se=$(tput rmso; tput sgr0)
+export LESS_TERMCAP_us=$(tput smul; tput bold; tput setaf 7)
+export LESS_TERMCAP_ue=$(tput rmul; tput sgr0)
+export LESS_TERMCAP_mr=$(tput rev)
+export LESS_TERMCAP_mh=$(tput dim)
+
+if hash brew 2>/dev/null; then
+    source `brew --prefix`/etc/profile.d/z.sh
+fi
+
+# Architecture-based exports {
+arch_name="$(uname -m)"
+
+if [ "${arch_name}" = "x86_64" ]; then
+    echo "Running on Rosetta 2"
+    local LOCAL_ASDF_DATA_DIR=$(xbrew --prefix asdf)
+elif [ "${arch_name}" = "arm64" ]; then
+    echo "Running on ARM"
+    local LOCAL_ASDF_DATA_DIR=$(brew --prefix asdf)
+else
+    echo "Unknown architecture: ${arch_name}"
+fi
+
+export ASDF_DATA_DIR=$LOCAL_ASDF_DATA_DIR
+source "$ASDF_DATA_DIR/libexec/asdf.sh"
+
+# Python
+if [[ -d "$HOME/.virtualenvs" ]]
+then
+    local PYTHON_PATH=$(asdf where python)
+    export WORKON_HOME=$HOME/.virtualenvs
+    export VIRTUALENVWRAPPER_VIRTUALENV="$PYTHON_PATH/bin/virtualenv"
+    source "$PYTHON_PATH/bin/virtualenvwrapper.sh"
+fi
+
+# Kitty
+export KITTY_CONFIG_DIRECTORY="$DOTFILES/config/kitty/kitty.sym.conf"
+
+# Mycli pager: https://www.mycli.net/pager
+export LESS="-SRXF"
+# Readline (on the terminal) in vi mode
+set -o vi
+
+# Change default posgres user and database
+export PGDATABASE=postgres
+export PGUSER=postgres
+export PGHOST=localhost
+export HOMEBREW_NO_AUTO_UPDATE=1
+
+# Extend shell completion for kubectl alias k
+compdef __start_kubectl k
+
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

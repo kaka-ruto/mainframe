@@ -23,3 +23,17 @@ secrets:
   backend: bitwarden
 
 packages: packages.conf
+runtimes: runtimes.conf
+
+dev:
+  shell: shell/
+  git: git/
+  editor: editor/
+  terminal: terminal/
+  ssh: ssh/
+  bin: bin/
+  skills: skills/
+  mcp:
+    registry: mcp/registry.json
+    config: mcp/config.json
+  os: os/darwin.sh
