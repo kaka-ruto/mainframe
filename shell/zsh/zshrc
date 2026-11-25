@@ -77,8 +77,11 @@ zstyle ':completion:*' insert-tab pending
 zstyle ':completion:*' completer _expand _complete _files _correct _approximate
 
 # Source prompt and utils
-source "$DOTFILES/shell/zsh/prompt.zsh" 2>/dev/null
 source "$DOTFILES/shell/zsh/utils.zsh" 2>/dev/null
+source "$DOTFILES/shell/zsh/prompt.zsh" 2>/dev/null
+source "$DOTFILES/shell/zsh/git_prompt.zsh" 2>/dev/null
+source "$DOTFILES/shell/zsh/node_prompt.zsh" 2>/dev/null
+source "$DOTFILES/shell/zsh/jobs_prompt.zsh" 2>/dev/null
 
 # Source bash aliases
 [[ -f "$DOTFILES/shell/bash/aliases" ]] && source "$DOTFILES/shell/bash/aliases"
@@ -127,7 +130,11 @@ fi
 if command -v starship &>/dev/null; then
     eval "$(starship init zsh)"
 else
+    source "$DOTFILES/shell/zsh/utils.zsh" 2>/dev/null
     source "$DOTFILES/shell/zsh/prompt.zsh" 2>/dev/null
+    source "$DOTFILES/shell/zsh/git_prompt.zsh" 2>/dev/null
+    source "$DOTFILES/shell/zsh/node_prompt.zsh" 2>/dev/null
+    source "$DOTFILES/shell/zsh/jobs_prompt.zsh" 2>/dev/null
 fi
 
 # Mise (replaces asdf, nvm, rbenv, pyenv)
