@@ -19,6 +19,12 @@
         "args": [
           "mcp"
         ]
+      },
+      "bitwarden": {
+        "type": "stdio",
+        "command": "mcp-server-bitwarden",
+        "args": [],
+        "env": {}
       }
     }
   }

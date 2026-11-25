@@ -1,0 +1,12 @@
+{
+  "name": "bitwarden",
+  "type": "stdio",
+  "command": "mcp-server-bitwarden",
+  "args": [],
+  "env": {
+    "BW_SESSION": "{{secret:bw-session}}"
+  },
+  "secrets": {
+    "BW_SESSION": "bw-session"
+  }
+}

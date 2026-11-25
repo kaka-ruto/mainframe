@@ -9,6 +9,16 @@
         "ask-web-search-api-key"
       ],
       "type": "stdio"
+    },
+    "bitwarden": {
+      "type": "stdio",
+      "enabled": true,
+      "description": "Bitwarden password manager access",
+      "secrets": [
+        "bw-session"
+      ],
+      "install": "mcp/servers/bitwarden/install.sh",
+      "config": "mcp/servers/bitwarden/config.json"
     }
   },
   "version": 1

@@ -1,0 +1,20 @@
+# SSH configuration
+# Identity files are managed by mainframe (fetched from password manager)
+
+Host *
+    AddKeysToAgent yes
+    UseKeychain yes
+    IdentitiesOnly yes
+
+# GitHub
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519
+
+# Remote dev server
+Host dev-mf
+    HostName 212.47.73.20
+    Port 22
+    User ubuntu
+    IdentityFile ~/.ssh/dev-mf

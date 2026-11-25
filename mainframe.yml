@@ -21,6 +21,15 @@ hardening:
 
 secrets:
   backend: bitwarden
+  items:
+    - name: ssh-key-github
+      type: ssh_key
+      path: ~/.ssh/id_ed25519
+      bitwarden_item: "GitHub SSH Key"
+    - name: ssh-key-dev-mf
+      type: ssh_key
+      path: ~/.ssh/dev-mf
+      bitwarden_item: "dev-mf SSH Key"
 
 packages: packages.conf
 runtimes: runtimes.conf
