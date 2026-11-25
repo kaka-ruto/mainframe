@@ -3,7 +3,15 @@
 
 export ZSH=$DOTFILES/shell/zsh
 
-# Source utils (defines prepend_path, etc.)
+# Autoload functions first (defines prepend_path, etc.)
+if [[ -d $DOTFILES/shell/zsh/functions ]]; then
+    fpath=($DOTFILES/shell/zsh/functions $fpath)
+    for func in $DOTFILES/shell/zsh/functions/*(:t); do
+        autoload -U "$func" 2>/dev/null
+    done
+fi
+
+# Source utils
 [[ -f "$DOTFILES/shell/zsh/utils.zsh" ]] && source "$DOTFILES/shell/zsh/utils.zsh"
 
 # Prepend paths
@@ -25,14 +33,6 @@ if [ -z "$TMUX" ]; then
 else
     [[ -f "$DOTFILES/resources/tmux-256color-italic.terminfo" ]] && tic -x "$DOTFILES/resources/tmux-256color-italic.terminfo" 2>/dev/null
     export TERM=tmux-256color-italic
-fi
-
-# Autoload functions
-if [[ -d $DOTFILES/shell/zsh/functions ]]; then
-    fpath=($DOTFILES/shell/zsh/functions $fpath)
-    for func in $DOTFILES/shell/zsh/functions/*(:t); do
-        autoload -U "$func" 2>/dev/null
-    done
 fi
 
 fpath=($fpath ~/.zsh/completion)
