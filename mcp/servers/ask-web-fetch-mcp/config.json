@@ -1,0 +1,8 @@
+{
+  "name": "ask-web-fetch-mcp",
+  "type": "stdio",
+  "command": "/Users/kaka/.local/share/mise/installs/ruby/4.0.10/bin/ask-web-fetch-mcp",
+  "args": [],
+  "env": {},
+  "secrets": {}
+}
