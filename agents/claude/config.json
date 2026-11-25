@@ -1,0 +1,17 @@
+{
+  "name": "claude",
+  "type": "cli",
+  "install": {
+    "macos": "npm install -g @anthropic-ai/claude-code",
+    "linux": "npm install -g @anthropic-ai/claude-code"
+  },
+  "config_sync": {
+    "mcp": "~/.claude.json",
+    "settings": "~/.claude/settings.json",
+    "agents_md": "~/.claude/CLAUDE.md",
+    "skills": "~/.claude/skills/"
+  },
+  "secrets": [
+    "anthropic-api-key"
+  ]
+}

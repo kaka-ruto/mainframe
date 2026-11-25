@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "agents": {
+    "zcode": {
+      "config": "agents/zcode/config.json",
+      "enabled": true,
+      "description": "ZCode desktop AI coding assistant"
+    },
+    "opencode": {
+      "config": "agents/opencode/config.json",
+      "enabled": false,
+      "description": "OpenCode CLI AI coding assistant"
+    },
+    "claude": {
+      "config": "agents/claude/config.json",
+      "enabled": false,
+      "description": "Claude Code CLI AI coding assistant"
+    }
+  }
+}

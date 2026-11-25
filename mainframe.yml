@@ -46,3 +46,8 @@ dev:
     registry: mcp/registry.json
     config: mcp/config.json
   os: os/darwin.sh
+
+agents:
+  registry: agents/registry.json
+  enabled:
+    - zcode

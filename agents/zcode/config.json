@@ -1,0 +1,17 @@
+{
+  "name": "zcode",
+  "type": "desktop",
+  "install": {
+    "macos": "brew install --cask zcode 2>/dev/null || echo 'Install ZCode from https://zcode.ai'",
+    "linux": "curl -fsSL https://get.zcode.ai | bash"
+  },
+  "config_sync": {
+    "mcp": "~/.zcode/cli/config.json",
+    "settings": "~/.zcode/v2/setting.json",
+    "skills": "~/.agents/skills/",
+    "agents_md": "~/.zcode/AGENTS.md"
+  },
+  "secrets": [
+    "zcode-api-key"
+  ]
+}
