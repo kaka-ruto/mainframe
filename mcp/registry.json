@@ -20,14 +20,6 @@
       "install": "mcp/servers/bitwarden/install.sh",
       "config": "mcp/servers/bitwarden/config.json"
     },
-    "ask-web-fetch-mcp": {
-      "type": "stdio",
-      "enabled": true,
-      "description": "Web fetch - fetches URL and returns clean markdown",
-      "secrets": [],
-      "install": "mcp/servers/ask-web-fetch-mcp/install.sh",
-      "config": "mcp/servers/ask-web-fetch-mcp/config.json"
-    },
     "browse": {
       "type": "stdio",
       "enabled": true,
@@ -35,6 +27,14 @@
       "secrets": [],
       "install": "mcp/servers/browse/install.sh",
       "config": "mcp/servers/browse/config.json"
+    },
+    "web-fetch": {
+      "type": "stdio",
+      "enabled": true,
+      "description": "Web fetch - reads any URL as clean Markdown (4-tier: content negotiation, trafilatura, curl_cffi, patchright)",
+      "secrets": [],
+      "install": "mcp/servers/web-fetch/install.sh",
+      "config": "mcp/servers/web-fetch/config.json"
     }
   },
   "version": 1
