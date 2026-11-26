@@ -4,7 +4,7 @@ EXIT_CODE=0
 
 repo=$( git rev-parse --show-toplevel )
 hook_type=$( basename $0 )
-hooks=~/.dotfiles/git/hooks
+hooks=~/Code/kaka-ruto/mainframe/git/hooks
 
 shopt -s nullglob
 for hook in $hooks/*.$hook_type; do

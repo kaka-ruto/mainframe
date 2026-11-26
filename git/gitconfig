@@ -5,8 +5,8 @@
 [github]
 	user = kaka-ruto
 [init]
-    templatedir = ~/.dotfiles/git/templates
-	defaultBranch = main
+    templatedir = ~/Code/kaka-ruto/mainframe/git/templates
+	defaultBranch = master
 [alias]
     # list all aliases
     la = "!git config -l | grep alias | cut -c 7-"

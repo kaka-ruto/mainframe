@@ -9,7 +9,8 @@
     "mcp": "~/.zcode/cli/config.json",
     "settings": "~/.zcode/v2/setting.json",
     "skills": "~/.agents/skills/",
-    "agents_md": "~/.zcode/AGENTS.md"
+    "agents_md": "~/.zcode/AGENTS.md",
+    "chats": "agents/zcode/chats/"
   },
   "secrets": [
     "zcode-api-key"

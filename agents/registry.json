@@ -8,7 +8,7 @@
     },
     "opencode": {
       "config": "agents/opencode/config.json",
-      "enabled": false,
+      "enabled": true,
       "description": "OpenCode CLI AI coding assistant"
     },
     "claude": {
