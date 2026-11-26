@@ -7,9 +7,10 @@
   },
   "config_sync": {
     "mcp": "~/.config/opencode/mcp.json",
-    "settings": "~/.config/opencode/config.json",
+    "settings": "~/.config/opencode/opencode.json",
     "agents_md": "~/.config/opencode/AGENTS.md",
-    "chats": "agents/opencode/chats/"
+    "chats": "agents/opencode/chats/",
+    "data_dir": "~/.opencode"
   },
   "secrets": [
     "opencode-api-key"
