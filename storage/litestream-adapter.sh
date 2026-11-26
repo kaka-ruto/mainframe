@@ -42,7 +42,7 @@ case "$cmd" in
         db_path="$1"
         replica_key="$2"
         config_file=$(gen_config "$db_path" "$replica_key")
-        litestream replicate -config "$config_file" &
+        nohup litestream replicate -config "$config_file" >/tmp/litestream-replicate.log 2>&1 &
         echo "Litestream replicating $db_path → $replica_key (PID: $!)"
         ;;
     restore)
@@ -55,11 +55,18 @@ case "$cmd" in
             exit 0
         fi
         config_file=$(gen_config "$db_path" "$replica_key")
-        litestream restore -config "$config_file" -o "$db_path" 2>&1 || true
-        if [ -f "$db_path" ]; then
-            echo "Restored $db_path from $replica_key"
+        # Restore to temp first, then move to target
+        tmp_output="${db_path}.restore.tmp"
+        if litestream restore -config "$config_file" -o "$tmp_output" "$db_path" 2>&1; then
+            if [ -f "$tmp_output" ]; then
+                mv "$tmp_output" "$db_path"
+                echo "Restored $db_path from $replica_key"
+            else
+                echo "No remote backup found for $replica_key (first sync)"
+            fi
         else
             echo "No remote backup found for $replica_key (first sync)"
+            rm -f "$tmp_output"
         fi
         rm -f "$config_file"
         ;;
