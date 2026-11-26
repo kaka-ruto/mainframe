@@ -15,6 +15,24 @@ if ! command -v litestream &>/dev/null; then
     exit 1
 fi
 
+# Generate a litestream config file for a given DB path and replica key
+gen_config() {
+    local db_path="$1"
+    local replica_key="$2"
+    local config_file="/tmp/litestream-$$.yml"
+    cat > "$config_file" << EOF
+dbs:
+  - path: $db_path
+    replicas:
+      - url: s3://$MINIO_BUCKET/$replica_key
+        endpoint: $MINIO_ENDPOINT
+        access-key-id: $MINIO_ACCESS_KEY
+        secret-access-key: $MINIO_SECRET_KEY
+        force-path-style: true
+EOF
+    echo "$config_file"
+}
+
 cmd="${1:-}"
 shift || true
 
@@ -23,48 +41,47 @@ case "$cmd" in
         # Usage: litestream-adapter.sh replicate <db-path> <replica-key>
         db_path="$1"
         replica_key="$2"
-        litestream replicate "$db_path" "s3://$MINIO_BUCKET/$replica_key" \
-            --endpoint "$MINIO_ENDPOINT" \
-            --access-key-id "$MINIO_ACCESS_KEY" \
-            --secret-access-key "$MINIO_SECRET_KEY" \
-            --sync-interval "$LITESTREAM_INTERVAL" &
-        echo "Litestream replicating $db_path → $replica_key"
+        config_file=$(gen_config "$db_path" "$replica_key")
+        litestream replicate -config "$config_file" &
+        echo "Litestream replicating $db_path → $replica_key (PID: $!)"
         ;;
     restore)
-        # Usage: litestream-adapter.sh restore <db-path> <replica-key>
+        # Usage: litestream-adapter.sh restore <db-path> <replica-key> [--force]
         db_path="$1"
         replica_key="$2"
-        # Only restore if local DB doesn't exist or is older
-        if [ ! -f "$db_path" ]; then
-            litestream restore -o "$db_path" "s3://$MINIO_BUCKET/$replica_key" \
-                --endpoint "$MINIO_ENDPOINT" \
-                --access-key-id "$MINIO_ACCESS_KEY" \
-                --secret-access-key "$MINIO_SECRET_KEY"
+        force="${3:-}"
+        if [ -f "$db_path" ] && [ "$force" != "--force" ]; then
+            echo "Local DB exists, skipping restore (use --force to override)"
+            exit 0
+        fi
+        config_file=$(gen_config "$db_path" "$replica_key")
+        litestream restore -config "$config_file" -o "$db_path" 2>&1 || true
+        if [ -f "$db_path" ]; then
             echo "Restored $db_path from $replica_key"
         else
-            echo "Local DB exists, skipping restore (use --force to override)"
+            echo "No remote backup found for $replica_key (first sync)"
         fi
+        rm -f "$config_file"
         ;;
     snapshot)
         # Usage: litestream-adapter.sh snapshot <db-path> <replica-key>
         db_path="$1"
         replica_key="$2"
-        litestream snapshot "s3://$MINIO_BUCKET/$replica_key" \
-            --endpoint "$MINIO_ENDPOINT" \
-            --access-key-id "$MINIO_ACCESS_KEY" \
-            --secret-access-key "$MINIO_SECRET_KEY"
+        config_file=$(gen_config "$db_path" "$replica_key")
+        litestream replicate -config "$config_file" -once -force-snapshot 2>&1
+        rm -f "$config_file"
         echo "Snapshot created for $replica_key"
         ;;
     status)
-        # Usage: litestream-adapter.sh status <db-path>
-        db_path="$1"
-        litestream databases 2>/dev/null || echo "Litestream not running"
+        # Usage: litestream-adapter.sh status
+        if pgrep -x litestream &>/dev/null; then
+            echo "Litestream: running"
+        else
+            echo "Litestream: not running"
+        fi
         ;;
     *)
         echo "Usage: litestream-adapter.sh <replicate|restore|snapshot|status> [args...]" >&2
         exit 1
         ;;
 esac
-EOF
-chmod +x ~/Code/kaka-ruto/mainframe/storage/litestream-adapter.sh
-echo "done"

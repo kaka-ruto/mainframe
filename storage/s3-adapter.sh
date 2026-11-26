@@ -67,6 +67,3 @@ case "$cmd" in
         exit 1
         ;;
 esac
-EOF
-chmod +x ~/Code/kaka-ruto/mainframe/storage/s3-adapter.sh
-echo "done"

@@ -51,6 +51,3 @@ case "${1:-}" in
         exit 1
         ;;
 esac
-EOF
-chmod +x ~/Code/kaka-ruto/mainframe/agents/zcode/chats/adapter.sh
-echo "done"
