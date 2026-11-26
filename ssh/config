@@ -14,7 +14,7 @@ Host github.com
 
 # Remote dev server
 Host dev-mf
-    HostName 212.47.73.20
+    HostName 100.84.203.95  # Tailscale IP
     Port 22
     User ubuntu
     IdentityFile ~/.ssh/dev-mf
@@ -25,3 +25,17 @@ Host app-mf
     Port 22
     User root
     IdentityFile ~/.ssh/app-mf
+
+# data-mf VPS
+Host data-mf
+    HostName 185.176.252.134
+    Port 22
+    User root
+    IdentityFile ~/.ssh/data-mf
+
+# infra-mf VPS
+Host infra-mf
+    HostName 13.140.190.156
+    Port 22
+    User root
+    IdentityFile ~/.ssh/infra-mf

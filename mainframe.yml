@@ -34,6 +34,14 @@ secrets:
       type: ssh_key
       path: ~/.ssh/app-mf
       bitwarden_item: "app-mf SSH Key"
+    - name: ssh-key-data-mf
+      type: ssh_key
+      path: ~/.ssh/data-mf
+      bitwarden_item: "data-mf SSH Key"
+    - name: ssh-key-infra-mf
+      type: ssh_key
+      path: ~/.ssh/infra-mf
+      bitwarden_item: "infra-mf SSH Key"
 
 packages: packages.conf
 runtimes: runtimes.conf
