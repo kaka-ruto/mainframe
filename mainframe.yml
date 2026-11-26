@@ -30,6 +30,10 @@ secrets:
       type: ssh_key
       path: ~/.ssh/dev-mf
       bitwarden_item: "dev-mf SSH Key"
+    - name: ssh-key-app-mf
+      type: ssh_key
+      path: ~/.ssh/app-mf
+      bitwarden_item: "app-mf SSH Key"
 
 packages: packages.conf
 runtimes: runtimes.conf

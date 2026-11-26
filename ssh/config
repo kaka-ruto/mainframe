@@ -18,3 +18,10 @@ Host dev-mf
     Port 22
     User ubuntu
     IdentityFile ~/.ssh/dev-mf
+
+# app-mf VPS
+Host app-mf
+    HostName 100.85.164.117
+    Port 22
+    User root
+    IdentityFile ~/.ssh/app-mf
