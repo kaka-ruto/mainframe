@@ -2,8 +2,8 @@
   "name": "opencode",
   "type": "cli",
   "install": {
-    "macos": "brew install opencode 2>/dev/null || npm install -g opencode",
-    "linux": "npm install -g opencode"
+    "macos": "curl -fsSL https://raw.githubusercontent.com/opencode-ai/opencode/refs/heads/main/install | bash",
+    "linux": "curl -fsSL https://raw.githubusercontent.com/opencode-ai/opencode/refs/heads/main/install | bash"
   },
   "config_sync": {
     "mcp": "~/.config/opencode/mcp.json",
