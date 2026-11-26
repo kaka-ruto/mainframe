@@ -1,0 +1,8 @@
+{
+  "name": "web-search",
+  "type": "stdio",
+  "command": "$HOME/.local/bin/web-search",
+  "args": [],
+  "env": {},
+  "secrets": {}
+}

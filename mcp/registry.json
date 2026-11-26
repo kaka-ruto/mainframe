@@ -1,15 +1,5 @@
 {
   "servers": {
-    "ask-web-search-mcp": {
-      "type": "stdio",
-      "enabled": true,
-      "description": "Web search via tinyfish/SearXNG backend",
-      "secrets": [
-        "ask-web-search-api-key"
-      ],
-      "install": "mcp/servers/ask-web-search-mcp/install.sh",
-      "config": "mcp/servers/ask-web-search-mcp/config.json"
-    },
     "bitwarden": {
       "type": "stdio",
       "enabled": true,
@@ -35,6 +25,14 @@
       "secrets": [],
       "install": "mcp/servers/web-fetch/install.sh",
       "config": "mcp/servers/web-fetch/config.json"
+    },
+    "web-search": {
+      "type": "stdio",
+      "enabled": true,
+      "description": "Web search - multi-engine, keyless, with fallback, caching, injection defense",
+      "secrets": [],
+      "install": "mcp/servers/web-search/install.sh",
+      "config": "mcp/servers/web-search/config.json"
     }
   },
   "version": 1
