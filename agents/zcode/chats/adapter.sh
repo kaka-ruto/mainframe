@@ -31,8 +31,10 @@ restore() {
 watch() {
     echo "[$AGENT] Starting watch mode..."
     # Start Litestream replication for both DBs
-    "$CONFIG_DIR/storage/litestream-adapter.sh" replicate "$HOME_DIR/.zcode/v2/tasks-index.sqlite" "zcode/tasks-index"
-    "$CONFIG_DIR/storage/litestream-adapter.sh" replicate "$HOME_DIR/.zcode/cli/db.sqlite" "zcode/cli-db"
+    nohup "$CONFIG_DIR/storage/litestream-adapter.sh" replicate "$HOME_DIR/.zcode/v2/tasks-index.sqlite" "zcode/tasks-index" >/dev/null 2>&1 &
+    disown
+    nohup "$CONFIG_DIR/storage/litestream-adapter.sh" replicate "$HOME_DIR/.zcode/cli/db.sqlite" "zcode/cli-db" >/dev/null 2>&1 &
+    disown
     # Watch rollout transcripts
     if command -v fswatch &>/dev/null; then
         fswatch -o "$HOME_DIR/.zcode/cli/rollout/" | while read; do

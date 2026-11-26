@@ -25,7 +25,8 @@ restore() {
 
 watch() {
     echo "[$AGENT] Starting watch mode..."
-    "$CONFIG_DIR/storage/litestream-adapter.sh" replicate "$HOME_DIR/.opencode/opencode.db" "opencode/db"
+    nohup "$CONFIG_DIR/storage/litestream-adapter.sh" replicate "$HOME_DIR/.opencode/opencode.db" "opencode/db" >/dev/null 2>&1 &
+    disown
     echo "[$AGENT] Watch mode started"
 }
 
