@@ -59,6 +59,12 @@ dev:
     config: mcp/config.json
   os: os/darwin.sh
 
+# prod: section (for production-specific config)
+# prod:
+#   packages: packages.prod.conf
+#   os: os/linux.sh
+#   monitoring: monitoring/
+
 agents:
   registry: agents/registry.json
   enabled:
