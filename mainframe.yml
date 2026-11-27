@@ -22,7 +22,7 @@ hardening:
 secrets:
   backend: infisical
   host: "http://localhost:8080"
-  project: "mainframe"
+  project: "61ea639c-fd0c-4ccf-ba5f-cedd12eb72db"
   environment: "dev"
   # Machine identity credentials are stored in ~/.infisical/ or env vars:
   #   INFISICAL_CLIENT_ID, INFISICAL_CLIENT_SECRET
