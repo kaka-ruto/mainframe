@@ -12,7 +12,7 @@ machines:
     sandboxes:
       enabled: false
   - name: dev-mf
-    host: ubuntu@212.47.73.20
+    host: dev-mf
     os: ubuntu-24.04
     mode: dev
     ssh_key: ssh-key-dev-mf
