@@ -15,4 +15,11 @@ fi
 # Install Chromium for patchright (one-time)
 python3 -m patchright install chromium 2>/dev/null || true
 
+
+# Ensure the binary is available on PATH at ~/.local/bin
+mkdir -p "$HOME/.local/bin"
+if command -v web-fetch >/dev/null 2>&1 && [ ! -f "$HOME/.local/bin/web-fetch" ]; then
+    ln -sf "$(command -v web-fetch)" "$HOME/.local/bin/web-fetch"
+fi
+
 echo "web-fetch MCP available at $(command -v web-fetch)"

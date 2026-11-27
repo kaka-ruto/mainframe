@@ -26,19 +26,17 @@
         "args": [],
         "env": {}
       },
-      "ask-web-fetch-mcp": {
+      "web-fetch": {
         "type": "stdio",
-        "command": "/Users/kaka/.local/share/mise/installs/ruby/4.0.10/bin/ask-web-fetch-mcp",
+        "command": "/Users/kaka/.local/bin/web-fetch",
         "args": [],
         "env": {}
       },
-      "ask-web-search-mcp": {
+      "web-search": {
         "type": "stdio",
-        "command": "/Users/kaka/.local/bin/mcp-wrappers/ask-web-search-mcp",
+        "command": "/Users/kaka/.local/bin/web-search",
         "args": [],
-        "env": {
-          "SEARCH_BACKEND": "tinyfish"
-        }
+        "env": {}
       }
     }
   }

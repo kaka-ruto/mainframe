@@ -11,4 +11,11 @@ if ! command -v web-search &>/dev/null; then
     fi
 fi
 
+
+# Ensure the binary is available on PATH at ~/.local/bin
+mkdir -p "$HOME/.local/bin"
+if command -v web-search >/dev/null 2>&1 && [ ! -f "$HOME/.local/bin/web-search" ]; then
+    ln -sf "$(command -v web-search)" "$HOME/.local/bin/web-search"
+fi
+
 echo "web-search MCP available at $(command -v web-search)"

@@ -1,7 +1,7 @@
 {
   "name": "web-search",
   "type": "stdio",
-  "command": "$HOME/.local/bin/web-search",
+  "command": "/Users/kaka/.local/bin/web-search",
   "args": [],
   "env": {},
   "secrets": {}

@@ -1,7 +1,7 @@
 {
   "name": "web-fetch",
   "type": "stdio",
-  "command": "$HOME/.local/bin/web-fetch",
+  "command": "/Users/kaka/.local/bin/web-fetch",
   "args": [],
   "env": {},
   "secrets": {}
