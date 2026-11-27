@@ -20,28 +20,50 @@ hardening:
   fail2ban: true
 
 secrets:
-  backend: bitwarden
+  backend: infisical
+  host: "http://localhost:8080"
+  project: "mainframe"
+  environment: "dev"
+  # Machine identity credentials are stored in ~/.infisical/ or env vars:
+  #   INFISICAL_CLIENT_ID, INFISICAL_CLIENT_SECRET
+  # Bootstrap: store these in a secure location (e.g., one-time manual entry)
   items:
-    - name: ssh-key-github
+    - name: SSH_KEY_GITHUB
       type: ssh_key
       path: ~/.ssh/id_ed25519
-      bitwarden_item: "GitHub SSH Key"
-    - name: ssh-key-dev-mf
+      infisical_path: /ssh
+    - name: SSH_KEY_DEV_MF
       type: ssh_key
       path: ~/.ssh/dev-mf
-      bitwarden_item: "dev-mf SSH Key"
-    - name: ssh-key-app-mf
+      infisical_path: /ssh
+    - name: SSH_KEY_APP_MF
       type: ssh_key
       path: ~/.ssh/app-mf
-      bitwarden_item: "app-mf SSH Key"
-    - name: ssh-key-data-mf
+      infisical_path: /ssh
+    - name: SSH_KEY_DATA_MF
       type: ssh_key
       path: ~/.ssh/data-mf
-      bitwarden_item: "data-mf SSH Key"
-    - name: ssh-key-infra-mf
+      infisical_path: /ssh
+    - name: SSH_KEY_INFRA_MF
       type: ssh_key
       path: ~/.ssh/infra-mf
-      bitwarden_item: "infra-mf SSH Key"
+      infisical_path: /ssh
+    - name: INFISICAL_HOST
+      type: env
+      var: INFISICAL_HOST
+      infisical_path: /infisical
+    - name: INFISICAL_PROJECT_ID
+      type: env
+      var: INFISICAL_PROJECT_ID
+      infisical_path: /infisical
+    - name: INFISICAL_CLIENT_ID
+      type: env
+      var: INFISICAL_CLIENT_ID
+      infisical_path: /infisical
+    - name: INFISICAL_CLIENT_SECRET
+      type: env
+      var: INFISICAL_CLIENT_SECRET
+      infisical_path: /infisical
 
 packages: packages.conf
 runtimes: runtimes.conf

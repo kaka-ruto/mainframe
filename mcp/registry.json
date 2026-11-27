@@ -1,15 +1,5 @@
 {
   "servers": {
-    "bitwarden": {
-      "type": "stdio",
-      "enabled": true,
-      "description": "Bitwarden password manager access",
-      "secrets": [
-        "bw-session"
-      ],
-      "install": "mcp/servers/bitwarden/install.sh",
-      "config": "mcp/servers/bitwarden/config.json"
-    },
     "browse": {
       "type": "stdio",
       "enabled": true,
@@ -33,6 +23,19 @@
       "secrets": [],
       "install": "mcp/servers/web-search/install.sh",
       "config": "mcp/servers/web-search/config.json"
+    },
+    "infisical": {
+      "type": "stdio",
+      "enabled": true,
+      "description": "Infisical secrets management (self-hosted)",
+      "secrets": [
+        "infisical-host",
+        "infisical-client-id",
+        "infisical-client-secret",
+        "infisical-project-id"
+      ],
+      "install": "mcp/servers/infisical/install.sh",
+      "config": "mcp/servers/infisical/config.json"
     }
   },
   "version": 1

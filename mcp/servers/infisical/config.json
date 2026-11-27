@@ -1,0 +1,16 @@
+{
+  "command": "npx",
+  "args": ["-y", "@infisical/mcp"],
+  "env": {
+    "INFISICAL_HOST": "{{secret:infisical-host}}",
+    "INFISICAL_CLIENT_ID": "{{secret:infisical-client-id}}",
+    "INFISICAL_CLIENT_SECRET": "{{secret:infisical-client-secret}}",
+    "INFISICAL_PROJECT_ID": "{{secret:infisical-project-id}}"
+  },
+  "secrets": [
+    "infisical-host",
+    "infisical-client-id",
+    "infisical-client-secret",
+    "infisical-project-id"
+  ]
+}
