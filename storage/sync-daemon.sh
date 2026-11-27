@@ -23,6 +23,47 @@ fi
 mc alias set local "$MINIO_ENDPOINT" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY" --api S3v4 >/dev/null 2>&1 || true
 mc mb "local/$MINIO_BUCKET" 2>/dev/null || true
 
+
+# Tailscale peer discovery and sync
+if command -v tailscale &>/dev/null && tailscale status >/dev/null 2>&1; then
+    echo "Tailscale: connected. Discovering peers..."
+    # Get list of online peers (excluding self)
+    peers=$(tailscale status --json 2>/dev/null | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+self_ip = data.get('Self', {}).get('TailscaleIPs', [''])[0]
+for peer_id, peer in data.get('Peer', {}).items():
+    if peer.get('Online', False):
+        hostname = peer.get('HostName', '')
+        if hostname:
+            print(hostname)
+" 2>/dev/null || true)
+    if [ -n "$peers" ]; then
+        echo "Online peers: $peers"
+        # Sync MinIO data from peers (pull latest)
+        for peer in $peers; do
+            if [ "$peer" != "$(hostname)" ] && [ "$peer" != "kakas-macbook-pro" ]; then
+                echo "  Syncing from $peer..."
+                # Try to pull chat data from peer's MinIO via Tailscale IP
+                peer_ip=$(tailscale status --json 2>/dev/null | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+for pid, p in data.get('Peer', {}).items():
+    if p.get('HostName') == '$peer':
+        print(p.get('TailscaleIPs', [''])[0])
+        break
+" 2>/dev/null || true)
+                if [ -n "$peer_ip" ]; then
+                    mc alias set "peer-$peer" "http://$peer_ip:9000" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY" --api S3v4 >/dev/null 2>&1 || true
+                    mc mirror --overwrite "peer-$peer/$MINIO_BUCKET" "local/$MINIO_BUCKET" 2>/dev/null || true
+                fi
+            fi
+        done
+    fi
+else
+    echo "Tailscale: not available or not connected. Using local sync only."
+fi
+
 # Start Litestream replication for ZCode DBs
 if [ -f "$HOME/.zcode/v2/tasks-index.sqlite" ]; then
     nohup "$CONFIG_DIR/storage/litestream-adapter.sh" replicate "$HOME/.zcode/v2/tasks-index.sqlite" "zcode/tasks-index" >/dev/null 2>&1 &
