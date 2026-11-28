@@ -1,0 +1,22 @@
+{
+  "_comment": "Published by mf (this repo) for boax to consume. Merge into boax-server config. Pools require 'boax setup' enrollment on each host (devhost BYOC adapter).",
+  "templates": [
+    {
+      "name": "devbox-ubuntu",
+      "description": "Anywaye dev box: Ubuntu 24.04 + packages.conf, provisioned by sync.sh (skills, MCP, gitconfig, repos)",
+      "provision": "https://raw.githubusercontent.com/kaka-ruto/mainframe/master/sync.sh"
+    }
+  ],
+  "profiles": [
+    {
+      "name": "agent-dev",
+      "template": "devbox-ubuntu",
+      "resources": { "cpu": 4, "memoryMiB": 8192, "diskGiB": 40 },
+      "capabilities": ["snapshots.disk"]
+    }
+  ],
+  "pools": [
+    { "name": "dev-mf", "adapter": "devhost", "labels": { "fleet": "dev", "os": "ubuntu-24.04" } },
+    { "name": "macbook", "adapter": "devhost", "labels": { "fleet": "dev", "os": "macos" } }
+  ]
+}

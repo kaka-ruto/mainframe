@@ -38,3 +38,18 @@ mf init https://github.com/kaka-ruto/mainframe.git
 # Apply to machine
 mf apply
 ```
+
+## Publishing box specs to boax
+
+This repo is the single source of truth for what an agent box contains.
+`sandbox.yml` + `sync.sh` are consumed two ways:
+
+- **mf apply (host)** — configures your own interactive agent environment.
+- **boax (boxes)** — `boax/config.json` is the published projection of
+  `sandbox.yml` as boax `templates` + `profiles` + `pools`. Merge it into the
+  boax-server config; `boax sync --repo <this repo>` (or
+  `BOAX_CONFIG_REPO=<this repo>`) pulls `sync.sh` into a box.
+
+Boxes are long-lived: runs reuse pool boxes and refresh them via snapshots —
+they are not destroyed per run. Rule of thumb: **the box spec lives here, never
+in boax or any.** See the "Role boundaries" section in the mf/boax/any READMEs.
