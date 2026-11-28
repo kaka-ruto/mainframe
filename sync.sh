@@ -4,6 +4,10 @@
 # Secrets are injected by boax, not fetched here
 set -euo pipefail
 
+# Optional secrets: repo cloning is best-effort; without a token the clone
+# step below warns and skips instead of failing provisioning.
+GH_TOKEN="${GH_TOKEN:-}"
+
 CONFIG_REPO="${CONFIG_REPO:-https://github.com/kaka-ruto/mainframe.git}"
 BASE_DIR="${BASE_DIR:-/code}"
 
