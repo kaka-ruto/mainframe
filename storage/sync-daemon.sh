@@ -69,8 +69,8 @@ if [ -f "$HOME/.zcode/v2/tasks-index.sqlite" ]; then
     nohup "$CONFIG_DIR/storage/litestream-adapter.sh" replicate "$HOME/.zcode/v2/tasks-index.sqlite" "zcode/tasks-index" >/dev/null 2>&1 &
     disown
 fi
-if [ -f "$HOME/.zcode/cli/db.sqlite" ]; then
-    nohup "$CONFIG_DIR/storage/litestream-adapter.sh" replicate "$HOME/.zcode/cli/db.sqlite" "zcode/cli-db" >/dev/null 2>&1 &
+if [ -f "$HOME/.zcode/cli/db/db.sqlite" ]; then
+    nohup "$CONFIG_DIR/storage/litestream-adapter.sh" replicate "$HOME/.zcode/cli/db/db.sqlite" "zcode/cli-db" >/dev/null 2>&1 &
     disown
 fi
 
