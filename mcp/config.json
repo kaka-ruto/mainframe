@@ -15,26 +15,24 @@
       },
       "browse": {
         "type": "stdio",
-        "command": "/Users/kaka/.local/bin/browse",
-        "args": [
-          "mcp"
-        ]
+        "command": "npx",
+        "args": ["-y", "@playwright/mcp@latest", "--browser", "chrome"]
       },
       "bitwarden": {
         "type": "stdio",
-        "command": "/Users/kaka/.local/bin/mcp-wrappers/bitwarden-mcp",
+        "command": "mcp-server-bitwarden",
         "args": [],
         "env": {}
       },
       "web-fetch": {
         "type": "stdio",
-        "command": "/Users/kaka/.local/bin/web-fetch",
+        "command": "web-fetch",
         "args": [],
         "env": {}
       },
       "web-search": {
         "type": "stdio",
-        "command": "/Users/kaka/.local/bin/web-search",
+        "command": "web-search",
         "args": [],
         "env": {}
       }
